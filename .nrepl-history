@@ -15,3 +15,6 @@ core/respond-hello
 (require :reload 'core)
 (exit)
 (require :reload 'core)
+(require '[io.pedestal.http.route :as route])
+(route/try-routing-for core/routes :prefix-tree "/putrequest" :put)
+(core/put-route {})
