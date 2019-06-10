@@ -1,28 +1,22 @@
 (ns core
   (:require [io.pedestal.http :as http]
             ; Lets you connect to servers, handle requests, and send responses.
-            [io.pedestal.http.route :as route]))
+            [io.pedestal.http.route :as route]
             ; Handles routing for urls.
+            [io.pedestal.http.body-params :as body-params]
+            [io.pedestal.http.route.definition :refer [defroutes]]))
 
-(defn put-route
+(defn hello-world
   [req]
-  {:status 200 :body "This was a put request"})
+  (let [name (get-in req [:params :name] "World!")]
+    {:status 200 :body (str "Hello" name "!\n")}))
 
-(defn respond-hello
-  [req]
-  {:status 200 :body {:greeting "Hello World"
-                      :greeter "Pedestal"}})
-(def routes
-  (route/expand-routes
-   #{["/greet" :get respond-hello :route-name :greet]
-     ["/putrequest" :put put-route :route-name :put-route]}))
+(defroutes routes
+           [[["/"
+              ["/hello" {:get hello-world}]]]])
 
-(defn create-server
-  []
-  (http/create-server {:http/routes routes
-                       :http/type :jetty
-                       :http/port :4224}))
-
-(defn start
-  []
-  (http/start (create-server)))
+(def service {:env :dev
+              ::http/routes routes
+              ::http/resource-path "/public"
+              ::http/type :jetty
+              ::http/port 4224})
